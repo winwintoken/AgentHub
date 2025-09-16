@@ -4,13 +4,63 @@ import React, { useState } from 'react';
 import { useWallet } from '@/lib/wallet';
 import toast from 'react-hot-toast';
 
-const PERSONALITY_OPTIONS = [
-  { value: 'sweet', label: 'Sweet & Cute', description: 'Gentle and caring, speaks softly, loves to act cute' },
-  { value: 'cool', label: 'Cool & Elegant', description: 'Calm personality, independent, sometimes prideful' },
-  { value: 'cheerful', label: 'Cheerful & Lively', description: 'Optimistic and upbeat, full of energy, loves to talk and laugh' },
-  { value: 'gentle', label: 'Gentle & Intelligent', description: 'Mature and steady, understanding, full of wisdom' },
-  { value: 'mysterious', label: 'Mysterious & Alluring', description: 'Mysterious and charming, speaks with subtle hints' },
-  { value: 'tsundere', label: 'Tsundere Type', description: 'Cold outside, warm inside, often says the opposite of what they mean' }
+const AI_PROFESSION_OPTIONS = [
+  {
+    value: 'assistant',
+    label: '🤖 Personal Assistant',
+    emoji: '💼',
+    description: 'Efficient and organized, helps with daily tasks, scheduling, and productivity',
+    color: 'var(--primary-gradient)'
+  },
+  {
+    value: 'teacher',
+    label: '👨‍🏫 AI Teacher',
+    emoji: '📚',
+    description: 'Patient and knowledgeable, explains complex topics in simple terms',
+    color: 'var(--success-color)'
+  },
+  {
+    value: 'developer',
+    label: '👩‍💻 Code Developer',
+    emoji: '⚡',
+    description: 'Expert programmer, helps with coding, debugging, and technical solutions',
+    color: 'var(--accent-color)'
+  },
+  {
+    value: 'analyst',
+    label: '📊 Data Analyst',
+    emoji: '📈',
+    description: 'Analytical and detail-oriented, provides insights from data and trends',
+    color: 'var(--warning-color)'
+  },
+  {
+    value: 'creative',
+    label: '🎨 Creative Director',
+    emoji: '🌟',
+    description: 'Imaginative and artistic, helps with creative projects and design',
+    color: 'var(--error-color)'
+  },
+  {
+    value: 'consultant',
+    label: '💼 Business Consultant',
+    emoji: '💡',
+    description: 'Strategic thinker, provides business advice and market insights',
+    color: 'var(--secondary-gradient)'
+  },
+  {
+    value: 'therapist',
+    label: '🧘‍♀️ AI Therapist',
+    emoji: '💚',
+    description: 'Empathetic and supportive, provides emotional support and guidance',
+    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  },
+  {
+    value: 'researcher',
+    label: '🔬 Research Scientist',
+    emoji: '🧪',
+    description: 'Curious and methodical, conducts research and analysis on various topics',
+    color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+  }
 ];
 
 export default function MintAIAgent() {
@@ -18,8 +68,8 @@ export default function MintAIAgent() {
 
   const [formData, setFormData] = useState({
     name: '',
-    personality: '',
-    customPersonality: '',
+    profession: '',
+    customProfession: '',
     imageFile: null as File | null,
     isPublic: true
   });
@@ -73,15 +123,15 @@ export default function MintAIAgent() {
     }
   };
 
-  const handlePersonalityChange = (personality: string) => {
-    setFormData(prev => ({ ...prev, personality, customPersonality: '' }));
+  const handleProfessionChange = (profession: string) => {
+    setFormData(prev => ({ ...prev, profession, customProfession: '' }));
   };
 
-  const getPersonalityDescription = () => {
-    if (formData.personality === 'custom') {
-      return formData.customPersonality;
+  const getProfessionDescription = () => {
+    if (formData.profession === 'custom') {
+      return formData.customProfession;
     }
-    return PERSONALITY_OPTIONS.find(p => p.value === formData.personality)?.description || '';
+    return AI_PROFESSION_OPTIONS.find(p => p.value === formData.profession)?.description || '';
   };
 
   const mintNFT = async () => {
@@ -90,7 +140,7 @@ export default function MintAIAgent() {
       return;
     }
 
-    if (!formData.name || !formData.personality || !formData.imageFile) {
+    if (!formData.name || !formData.profession || !formData.imageFile) {
       toast.error('Please fill in complete information');
       return;
     }
@@ -128,10 +178,10 @@ export default function MintAIAgent() {
 
       setUploadStatus('Preparing personality data...');
 
-      // 准备人格数据（简化版本，直接使用明文）
-      const personalityDescription = formData.personality === 'custom'
-        ? formData.customPersonality || ''
-        : getPersonalityDescription();
+      // 准备职业数据（简化版本，直接使用明文）
+      const professionDescription = formData.profession === 'custom'
+        ? formData.customProfession || ''
+        : getProfessionDescription();
 
       setUploadStatus('Minting NFT...');
 
@@ -141,7 +191,7 @@ export default function MintAIAgent() {
       const result = await mintAgent(
         signer,
         formData.name,
-        personalityDescription,
+        professionDescription,
         imageHash,
         formData.isPublic
       );
@@ -151,8 +201,8 @@ export default function MintAIAgent() {
       // 重置表单
       setFormData({
         name: '',
-        personality: '',
-        customPersonality: '',
+        profession: '',
+        customProfession: '',
         imageFile: null,
         isPublic: true
       });
@@ -198,107 +248,198 @@ export default function MintAIAgent() {
   };
 
 
-  const sectionStyle: React.CSSProperties = {
-    marginBottom: '1.5rem',
-    padding: '1rem',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    backgroundColor: '#fafafa'
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    marginTop: '1rem',
-    width: '100%'
-  };
-
-  const disabledButtonStyle: React.CSSProperties = {
-    ...buttonStyle,
-    backgroundColor: '#6c757d',
-    cursor: 'not-allowed'
-  };
-
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#e91e63' }}>
-        💝 Mint Your AI Agent
-      </h2>
+    <div style={{
+      maxWidth: '800px',
+      margin: '0 auto',
+      padding: '32px 24px',
+      animation: 'fadeIn 0.6s ease-out'
+    }}>
+      {/* Hero Section */}
+      <div className="glass" style={{
+        textAlign: 'center',
+        padding: '40px 32px',
+        marginBottom: '40px',
+        borderRadius: '24px',
+        position: 'relative',
+        overflow: 'hidden',
+        animation: 'slideUp 0.6s ease-out'
+      }}>
+        <div style={{
+          fontSize: '80px',
+          marginBottom: '16px',
+          animation: 'float 3s ease-in-out infinite'
+        }}>🤖</div>
+        <h1 style={{
+          margin: '0 0 16px 0',
+          fontSize: '32px',
+          fontWeight: '800',
+          background: 'var(--primary-gradient)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          Create Your AI Agent
+        </h1>
+        <p style={{
+          color: 'var(--text-secondary)',
+          fontSize: '16px',
+          lineHeight: '1.6',
+          maxWidth: '500px',
+          margin: '0 auto'
+        }}>
+          Bring your AI agent to life with a unique profession and personality.
+          Mint as an NFT and let others interact with your creation! ✨
+        </p>
+      </div>
 
       {/* 基本信息 */}
-      <div style={sectionStyle}>
-        <h3 style={{ marginTop: 0, color: '#007bff' }}>Basic Information</h3>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Agent Name:
+      <div className="glass" style={{
+        padding: '32px',
+        marginBottom: '32px',
+        borderRadius: '20px',
+        animation: 'slideUp 0.6s ease-out 0.1s both'
+      }}>
+        <h3 style={{
+          margin: '0 0 24px 0',
+          fontSize: '20px',
+          fontWeight: '700',
+          color: 'var(--text-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          📝 Basic Information
+        </h3>
+
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)'
+          }}>
+            Agent Name
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Give your AI agent a name..."
+            placeholder="Give your AI agent a unique name..."
+            className="glass"
             style={{
               width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '1rem'
+              padding: '12px 16px',
+              border: '1px solid var(--glass-border)',
+              borderRadius: '12px',
+              fontSize: '16px',
+              color: 'var(--text-primary)',
+              background: 'var(--glass-bg)',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.3s ease'
             }}
             disabled={isUploading}
+            onFocus={(e) => {
+              e.target.style.borderColor = 'var(--accent-color)';
+              e.target.style.boxShadow = '0 0 0 3px rgba(0, 212, 255, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'var(--glass-border)';
+              e.target.style.boxShadow = 'none';
+            }}
           />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Upload Avatar (Max 5MB):
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)'
+          }}>
+            Agent Avatar (Max 5MB)
           </label>
 
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            className="glass"
             style={{
-              border: `2px dashed ${isDragging ? '#e91e63' : '#ddd'}`,
-              borderRadius: '8px',
-              padding: '2rem',
+              border: `2px dashed ${isDragging ? 'var(--accent-color)' : 'var(--glass-border)'}`,
+              borderRadius: '16px',
+              padding: '32px',
               textAlign: 'center',
-              backgroundColor: isDragging ? '#fce4ec' : '#f9f9f9',
+              background: isDragging ? 'rgba(0, 212, 255, 0.1)' : 'var(--glass-bg)',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              position: 'relative'
+              position: 'relative',
+              backdropFilter: 'blur(10px)'
             }}
             onClick={() => document.getElementById('imageInput')?.click()}
           >
             {previewImage ? (
               <div>
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  style={{
-                    maxWidth: '200px',
-                    maxHeight: '200px',
-                    borderRadius: '8px',
-                    border: '2px solid #e91e63'
-                  }}
-                />
-                <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
-                  Click or drag to change image
+                <div style={{
+                  width: '200px',
+                  height: '200px',
+                  margin: '0 auto 16px',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  border: '3px solid var(--accent-color)',
+                  boxShadow: '0 8px 24px rgba(0, 212, 255, 0.3)'
+                }}>
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </div>
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}>
+                  ✨ Click or drag to change image
                 </p>
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📸</div>
-                <p style={{ color: '#666', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>
-                  {isDragging ? 'Drop image here' : 'Click to select or drag image here'}
+                <div style={{
+                  fontSize: '64px',
+                  marginBottom: '16px',
+                  filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))'
+                }}>🖼️</div>
+                <h4 style={{
+                  color: 'var(--text-primary)',
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  marginBottom: '8px'
+                }}>
+                  {isDragging ? '📁 Drop your image here!' : '📸 Upload Agent Avatar'}
+                </h4>
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '14px',
+                  marginBottom: '12px'
+                }}>
+                  Click to browse or drag & drop your image
                 </p>
-                <p style={{ color: '#999', margin: 0, fontSize: '0.8rem' }}>
-                  Supports: JPG, PNG, GIF (Max 5MB)
-                </p>
+                <div className="glass" style={{
+                  display: 'inline-block',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: 'var(--text-muted)'
+                }}>
+                  Supports: JPG, PNG, GIF • Max 5MB
+                </div>
               </div>
             )}
           </div>
@@ -313,111 +454,314 @@ export default function MintAIAgent() {
           />
         </div>
 
-        <div>
-          <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem' }}>
-            <input
-              type="checkbox"
-              checked={formData.isPublic}
-              onChange={(e) => setFormData(prev => ({ ...prev, isPublic: e.target.checked }))}
-              disabled={isUploading}
-              style={{ marginRight: '0.5rem' }}
-            />
-            Allow others to pay to chat with my AI agent (you will get 90% revenue share)
-          </label>
+        <div className="glass" style={{
+          padding: '20px',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <input
+            type="checkbox"
+            checked={formData.isPublic}
+            onChange={(e) => setFormData(prev => ({ ...prev, isPublic: e.target.checked }))}
+            disabled={isUploading}
+            style={{
+              width: '20px',
+              height: '20px',
+              accentColor: 'var(--accent-color)'
+            }}
+          />
+          <div>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: 'var(--text-primary)',
+              marginBottom: '4px'
+            }}>
+              💰 Enable Public Access
+            </div>
+            <div style={{
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              lineHeight: '1.4'
+            }}>
+              Allow others to chat with your AI agent for 0.01 $OG (you get 90% revenue share)
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 性格选择 */}
-      <div style={sectionStyle}>
-        <h3 style={{ marginTop: 0, color: '#28a745' }}>Personality Settings</h3>
+      {/* 职业选择 */}
+      <div className="glass" style={{
+        padding: '32px',
+        marginBottom: '32px',
+        borderRadius: '20px',
+        animation: 'slideUp 0.6s ease-out 0.2s both'
+      }}>
+        <h3 style={{
+          margin: '0 0 24px 0',
+          fontSize: '20px',
+          fontWeight: '700',
+          color: 'var(--text-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          🎭 Choose AI Profession
+        </h3>
+
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '0.75rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '16px'
         }}>
-          {PERSONALITY_OPTIONS.map((option) => (
+          {AI_PROFESSION_OPTIONS.map((option, index) => (
             <label
               key={option.value}
+              className="glass"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '1rem',
-                border: `2px solid ${formData.personality === option.value ? '#e91e63' : '#ddd'}`,
-                borderRadius: '8px',
+                padding: '20px',
+                border: `2px solid ${formData.profession === option.value ? 'var(--accent-color)' : 'var(--glass-border)'}`,
+                borderRadius: '16px',
                 cursor: 'pointer',
-                backgroundColor: formData.personality === option.value ? '#fce4ec' : 'white',
-                transition: 'all 0.2s ease',
-                minHeight: '100px'
+                background: formData.profession === option.value ? 'rgba(0, 212, 255, 0.1)' : 'var(--glass-bg)',
+                transition: 'all 0.3s ease',
+                minHeight: '140px',
+                position: 'relative',
+                overflow: 'hidden',
+                animation: `slideUp 0.6s ease-out ${0.3 + index * 0.05}s both`
+              }}
+              onMouseEnter={(e) => {
+                if (formData.profession !== option.value) {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.2)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (formData.profession !== option.value) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+              {/* 顶部装饰线 */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '3px',
+                background: option.color,
+                opacity: formData.profession === option.value ? 1 : 0.3,
+                transition: 'opacity 0.3s ease'
+              }} />
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '12px',
+                gap: '8px'
+              }}>
                 <input
                   type="radio"
-                  name="personality"
+                  name="profession"
                   value={option.value}
-                  checked={formData.personality === option.value}
-                  onChange={() => handlePersonalityChange(option.value)}
+                  checked={formData.profession === option.value}
+                  onChange={() => handleProfessionChange(option.value)}
                   disabled={isUploading}
-                  style={{ marginRight: '0.5rem', marginTop: '0.1rem' }}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    accentColor: 'var(--accent-color)'
+                  }}
                 />
-                <strong>{option.label}</strong>
+                <div style={{
+                  fontSize: '32px',
+                  marginRight: '8px'
+                }}>
+                  {option.emoji}
+                </div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  color: 'var(--text-primary)'
+                }}>
+                  {option.label.split(' ').slice(1).join(' ')}
+                </div>
               </div>
-              <div style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, flex: 1 }}>
+
+              <div style={{
+                fontSize: '13px',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.5',
+                flex: 1
+              }}>
                 {option.description}
               </div>
+
+              {/* 选中状态指示器 */}
+              {formData.profession === option.value && (
+                <div style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  background: 'var(--accent-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  boxShadow: '0 2px 8px rgba(0, 212, 255, 0.4)'
+                }}>
+                  ✓
+                </div>
+              )}
             </label>
           ))}
 
-          {/* Custom Personality */}
+          {/* Custom Profession */}
           <label
+            className="glass"
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'flex-start',
-              padding: '1rem',
-              border: `2px solid ${formData.personality === 'custom' ? '#e91e63' : '#ddd'}`,
-              borderRadius: '8px',
+              padding: '20px',
+              border: `2px solid ${formData.profession === 'custom' ? 'var(--accent-color)' : 'var(--glass-border)'}`,
+              borderRadius: '16px',
               cursor: 'pointer',
-              backgroundColor: formData.personality === 'custom' ? '#fce4ec' : 'white',
-              transition: 'all 0.2s ease',
-              minHeight: '100px',
-              gridColumn: formData.personality === 'custom' ? 'span 2' : 'span 1'
+              background: formData.profession === 'custom' ? 'rgba(0, 212, 255, 0.1)' : 'var(--glass-bg)',
+              transition: 'all 0.3s ease',
+              minHeight: '140px',
+              gridColumn: formData.profession === 'custom' ? 'span 2' : 'span 1',
+              position: 'relative',
+              overflow: 'hidden',
+              animation: `slideUp 0.6s ease-out ${0.3 + AI_PROFESSION_OPTIONS.length * 0.05}s both`
+            }}
+            onMouseEnter={(e) => {
+              if (formData.profession !== 'custom') {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.2)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (formData.profession !== 'custom') {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+            {/* 顶部装饰线 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '3px',
+              background: 'linear-gradient(90deg, var(--primary-gradient), var(--secondary-gradient))',
+              opacity: formData.profession === 'custom' ? 1 : 0.3,
+              transition: 'opacity 0.3s ease'
+            }} />
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '12px',
+              gap: '8px'
+            }}>
               <input
                 type="radio"
-                name="personality"
+                name="profession"
                 value="custom"
-                checked={formData.personality === 'custom'}
-                onChange={() => handlePersonalityChange('custom')}
-                disabled={isUploading}
-                style={{ marginRight: '0.5rem', marginTop: '0.1rem' }}
-              />
-              <strong>Custom Personality</strong>
-            </div>
-            {formData.personality === 'custom' && (
-              <textarea
-                value={formData.customPersonality}
-                onChange={(e) => setFormData(prev => ({ ...prev, customPersonality: e.target.value }))}
-                placeholder="Describe your AI agent's personality traits..."
+                checked={formData.profession === 'custom'}
+                onChange={() => handleProfessionChange('custom')}
                 disabled={isUploading}
                 style={{
-                  width: '100%',
-                  marginTop: '0.5rem',
-                  padding: '0.5rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  resize: 'vertical',
-                  minHeight: '80px',
-                  fontSize: '0.9rem'
+                  width: '20px',
+                  height: '20px',
+                  accentColor: 'var(--accent-color)'
                 }}
               />
+              <div style={{
+                fontSize: '32px',
+                marginRight: '8px'
+              }}>
+                ⚡
+              </div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: 'var(--text-primary)'
+              }}>
+                Custom Profession
+              </div>
+            </div>
+
+            {formData.profession === 'custom' ? (
+              <textarea
+                value={formData.customProfession}
+                onChange={(e) => setFormData(prev => ({ ...prev, customProfession: e.target.value }))}
+                placeholder="Describe your AI agent's unique profession and capabilities..."
+                disabled={isUploading}
+                className="glass"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: '8px',
+                  resize: 'vertical',
+                  minHeight: '80px',
+                  fontSize: '14px',
+                  color: 'var(--text-primary)',
+                  background: 'var(--glass-bg)',
+                  backdropFilter: 'blur(10px)',
+                  lineHeight: '1.5'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-color)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 212, 255, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--glass-border)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+            ) : (
+              <div style={{
+                fontSize: '13px',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.5',
+                flex: 1
+              }}>
+                Create your own unique profession for your AI agent with custom capabilities and expertise
+              </div>
             )}
-            {formData.personality !== 'custom' && (
-              <div style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, flex: 1 }}>
-                Create your own unique personality for your AI agent
+
+            {/* 选中状态指示器 */}
+            {formData.profession === 'custom' && (
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: 'var(--accent-color)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '12px',
+                fontWeight: '700',
+                boxShadow: '0 2px 8px rgba(0, 212, 255, 0.4)'
+              }}>
+                ✓
               </div>
             )}
           </label>
@@ -425,56 +769,179 @@ export default function MintAIAgent() {
       </div>
 
       {/* 费用说明 */}
-      <div style={{
-        ...sectionStyle,
-        backgroundColor: '#fff3cd',
-        borderColor: '#ffeaa7',
-        color: '#856404'
+      <div className="glass" style={{
+        padding: '24px',
+        marginBottom: '32px',
+        borderRadius: '16px',
+        border: '2px solid var(--warning-color)',
+        background: 'rgba(255, 192, 72, 0.1)',
+        animation: 'slideUp 0.6s ease-out 0.3s both'
       }}>
-        <h4 style={{ marginTop: 0 }}>💰 Cost Information</h4>
-        <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
-          <li>Minting cost: 0.01 $OG (approximately creation cost)</li>
-          <li>Images and personality data will be permanently stored on 0G distributed network</li>
-          <li>If set to public, other users pay 0.01 $OG to chat with your AI agent, you get 90% revenue share</li>
-        </ul>
+        <h4 style={{
+          margin: '0 0 16px 0',
+          fontSize: '18px',
+          fontWeight: '700',
+          color: 'var(--text-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          💰 Pricing & Revenue
+        </h4>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '16px'
+        }}>
+          {[
+            {
+              icon: '🏗️',
+              title: 'Minting Cost',
+              desc: '0.01 $OG for creating your AI agent NFT'
+            },
+            {
+              icon: '💾',
+              title: 'Permanent Storage',
+              desc: 'Images and data stored forever on 0G network'
+            },
+            {
+              icon: '💸',
+              title: 'Revenue Share',
+              desc: 'Users pay 0.01 $OG to chat, you get 90% share'
+            }
+          ].map((item, index) => (
+            <div key={index} className="glass" style={{
+              padding: '16px',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>{item.icon}</div>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                marginBottom: '4px'
+              }}>
+                {item.title}
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.4'
+              }}>
+                {item.desc}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 铸造按钮和状态 */}
-      <button
-        onClick={mintNFT}
-        disabled={isUploading || !address || !formData.name || !formData.personality || !formData.imageFile}
-        style={isUploading || !address ? disabledButtonStyle : buttonStyle}
-      >
-        {isUploading ? 'Minting...' : 'Mint AI Agent NFT (0.01 $OG)'}
-      </button>
+      <div style={{
+        animation: 'slideUp 0.6s ease-out 0.4s both'
+      }}>
+        <button
+          onClick={mintNFT}
+          disabled={isUploading || !address || !formData.name || !formData.profession || !formData.imageFile}
+          className="btn btn-primary"
+          style={{
+            width: '100%',
+            padding: '16px 24px',
+            fontSize: '16px',
+            fontWeight: '700',
+            borderRadius: '16px',
+            background: (isUploading || !address || !formData.name || !formData.profession || !formData.imageFile)
+              ? 'var(--glass-bg)'
+              : 'var(--primary-gradient)',
+            color: (isUploading || !address || !formData.name || !formData.profession || !formData.imageFile)
+              ? 'var(--text-muted)'
+              : 'white',
+            border: 'none',
+            cursor: (isUploading || !address || !formData.name || !formData.profession || !formData.imageFile)
+              ? 'not-allowed'
+              : 'pointer',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: (isUploading || !address || !formData.name || !formData.profession || !formData.imageFile)
+              ? 'none'
+              : '0 4px 15px rgba(102, 126, 234, 0.3)'
+          }}
+        >
+          {isUploading ? (
+            <>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderTop: '2px solid white',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
+              Minting Your Agent...
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: '20px' }}>🚀</span>
+              Mint AI Agent NFT (0.01 $OG)
+            </>
+          )}
+        </button>
 
-      {uploadStatus && (
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          backgroundColor: '#d4edda',
-          border: '1px solid #c3e6cb',
-          borderRadius: '4px',
-          color: '#155724',
-          textAlign: 'center'
-        }}>
-          {uploadStatus}
-        </div>
-      )}
+        {uploadStatus && (
+          <div className="glass" style={{
+            marginTop: '16px',
+            padding: '16px',
+            borderRadius: '12px',
+            textAlign: 'center',
+            background: 'rgba(38, 222, 129, 0.1)',
+            border: '1px solid var(--success-color)',
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <div style={{
+              color: 'var(--success-color)',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '16px' }}>⚡</span>
+              {uploadStatus}
+            </div>
+          </div>
+        )}
 
-      {!address && (
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          backgroundColor: '#f8d7da',
-          border: '1px solid #f5c6cb',
-          borderRadius: '4px',
-          color: '#721c24',
-          textAlign: 'center'
-        }}>
-          Please connect wallet first to mint NFT
-        </div>
-      )}
+        {!address && (
+          <div className="glass" style={{
+            marginTop: '16px',
+            padding: '16px',
+            borderRadius: '12px',
+            textAlign: 'center',
+            background: 'rgba(255, 107, 107, 0.1)',
+            border: '1px solid var(--error-color)',
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <div style={{
+              color: 'var(--error-color)',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '16px' }}>👛</span>
+              Please connect your wallet first to mint your AI agent
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
