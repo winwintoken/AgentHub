@@ -12,7 +12,7 @@ export default function Home() {
 
   const navButtonStyle = (isActive: boolean): React.CSSProperties => ({
     padding: '12px 24px',
-    border: 'none',
+    border: isActive ? 'none' : '1px solid var(--glass-border)',
     background: isActive
       ? 'var(--primary-gradient)'
       : 'var(--glass-bg)',
@@ -23,7 +23,6 @@ export default function Home() {
     fontWeight: '600',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
-    border: isActive ? 'none' : '1px solid var(--glass-border)',
     boxShadow: isActive ? '0 4px 15px rgba(102, 126, 234, 0.3)' : 'none',
     position: 'relative',
     overflow: 'hidden'
